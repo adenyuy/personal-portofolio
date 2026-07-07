@@ -12,7 +12,7 @@ function RobotModel() {
     if (actions) {
       const actionNames = Object.keys(actions);
       if (actionNames.length > 0) {
-        actions[actionNames[0]].play();
+        actions[actionNames[0]]?.play();
       }
     }
   }, [actions]);
