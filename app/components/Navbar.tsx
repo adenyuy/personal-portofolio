@@ -8,11 +8,7 @@ const sections = ["hero", "about", "works", "skills", "contact"];
 export default function Navbar() {
   const [activeSection, setActiveSection] = useState<string>("");
   const [time, setTime] = useState<string>("");
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-  const [ringPos, setRingPos] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
-  const ringRef = useRef({ x: 0, y: 0 });
-  const animFrameRef = useRef<number>(0);
 
   // Live WIB clock
   useEffect(() => {
@@ -32,27 +28,7 @@ export default function Navbar() {
     return () => clearInterval(id);
   }, []);
 
-  // Custom cursor
-  useEffect(() => {
-    const moveCursor = (e: MouseEvent) => {
-      setCursorPos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", moveCursor);
 
-    // Smooth ring follow
-    const animate = () => {
-      ringRef.current.x += (cursorPos.x - ringRef.current.x) * 0.12;
-      ringRef.current.y += (cursorPos.y - ringRef.current.y) * 0.12;
-      setRingPos({ ...ringRef.current });
-      animFrameRef.current = requestAnimationFrame(animate);
-    };
-    animFrameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener("mousemove", moveCursor);
-      cancelAnimationFrame(animFrameRef.current);
-    };
-  }, [cursorPos]);
 
   // Hover detection for interactive elements
   useEffect(() => {
@@ -104,26 +80,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Custom Cursor */}
-      <div
-        className="custom-cursor"
-        style={{
-          left: cursorPos.x - 6,
-          top: cursorPos.y - 6,
-          transform: isHovering ? "scale(2.5)" : "scale(1)",
-          transition: "transform 0.2s ease",
-        }}
-      />
-      <div
-        className="custom-cursor-ring"
-        style={{
-          left: ringPos.x - 18,
-          top: ringPos.y - 18,
-          width: isHovering ? 60 : 36,
-          height: isHovering ? 60 : 36,
-          opacity: isHovering ? 0.3 : 0.5,
-        }}
-      />
+
 
       {/* Top-left: Brand + location + clock */}
       <motion.div

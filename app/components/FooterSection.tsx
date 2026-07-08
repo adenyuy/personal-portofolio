@@ -2,6 +2,8 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Dock, DockIcon } from "./magicui/dock";
+import { FiGithub, FiLinkedin, FiInstagram, FiMail } from "react-icons/fi";
 
 function DownloadResumeButton() {
   const text = "GRAB FULL RESUME";
@@ -124,29 +126,35 @@ export default function FooterSection() {
           <DownloadResumeButton />
         </motion.div>
 
-        {/* Contact links */}
+        {/* Contact links Dock */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-wrap justify-center gap-8"
+          className="relative w-full"
         >
-          {[
-            { label: "LINKEDIN", href: "https://www.linkedin.com/in/marvinugraha" },
-            { label: "EMAIL", href: "mailto:marvinugraha@gmail.com" },
-            { label: "GITHUB", href: "https://github.com/adenyuy" },
-          ].map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              target={link.href.startsWith("http") ? "_blank" : undefined}
-              rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
-              className="group flex items-center gap-2 font-barlow font-black text-[#888] text-xs tracking-[0.3em] uppercase hover:text-white transition-colors duration-300"
-            >
-              <span className="w-4 h-px bg-[#444] group-hover:bg-[#e8481a] transition-colors duration-300" />
-              {link.label}
-            </a>
-          ))}
+          <Dock iconSize={64} iconMagnification={100} iconDistance={140}>
+            <DockIcon>
+              <a href="https://github.com/adenyuy" target="_blank" rel="noreferrer" className="size-full flex items-center justify-center p-[10px] text-[#888] hover:text-[#e8481a] transition-colors duration-300">
+                <FiGithub className="w-full h-full" />
+              </a>
+            </DockIcon>
+            <DockIcon>
+              <a href="https://www.linkedin.com/in/marvinugraha" target="_blank" rel="noreferrer" className="size-full flex items-center justify-center p-[10px] text-[#888] hover:text-[#e8481a] transition-colors duration-300">
+                <FiLinkedin className="w-full h-full" />
+              </a>
+            </DockIcon>
+            <DockIcon>
+              <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="size-full flex items-center justify-center p-[10px] text-[#888] hover:text-[#e8481a] transition-colors duration-300">
+                <FiInstagram className="w-full h-full" />
+              </a>
+            </DockIcon>
+            <DockIcon>
+              <a href="mailto:marvinugraha@gmail.com" target="_blank" rel="noreferrer" className="size-full flex items-center justify-center p-[10px] text-[#888] hover:text-[#e8481a] transition-colors duration-300">
+                <FiMail className="w-full h-full" />
+              </a>
+            </DockIcon>
+          </Dock>
         </motion.div>
       </div>
 

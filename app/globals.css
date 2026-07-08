@@ -6,15 +6,14 @@
     --bg-secondary: #141414;
     --bg-card: #1a1a1a;
     --accent: #e8481a;
-    --accent-hover: #ff5a28;
+    --accent-hover: #e5fa73;
     --text-primary: #ffffff;
     --text-secondary: #888888;
     --text-muted: #555555;
-    --border: #2a2a2a;
+    --border: #333333;
   }
 
   html {
-    scroll-behavior: smooth;
     background-color: var(--bg-primary);
   }
 
@@ -91,26 +90,4 @@
   font-family: var(--font-barlow), sans-serif;
 }
 
-/* Custom cursor */
-.custom-cursor {
-  position: fixed;
-  width: 12px;
-  height: 12px;
-  background: var(--accent);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transition: transform 0.1s ease;
-  mix-blend-mode: normal;
-}
 
-.custom-cursor-ring {
-  position: fixed;
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(232, 72, 26, 0.5);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9998;
-  transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease;
-}

@@ -127,19 +127,39 @@ export default function AboutSection() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.7 }}
-          className="lg:w-[28rem] lg:h-[36rem] w-full h-80 rounded-sm flex-shrink-0 relative group"
+          className="lg:w-[28rem] lg:h-[36rem] w-full h-80 flex-shrink-0 relative group p-4"
         >
+          {/* Ambient Glow */}
+          <div className="absolute inset-0 bg-[#e8481a] opacity-0 group-hover:opacity-20 blur-3xl transition-opacity duration-700" />
+          
+          {/* HUD Corner Brackets */}
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:-translate-x-1 group-hover:-translate-y-1 transition-all duration-500" />
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-500" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:-translate-x-1 group-hover:translate-y-1 transition-all duration-500" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:translate-x-1 group-hover:translate-y-1 transition-all duration-500" />
+
+          {/* Floating Image Container */}
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="w-full h-full relative rounded-sm overflow-hidden bg-[#141414] shadow-2xl shadow-[#e8481a]/5 border border-white/5"
+            className="w-full h-full relative overflow-hidden bg-[#141414] shadow-2xl transition-all duration-700 group-hover:shadow-[0_0_40px_rgba(232,72,26,0.3)] border border-white/5"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-[#e8481a]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 mix-blend-overlay pointer-events-none" />
+            {/* Sci-Fi Scanning Line Animation */}
+            <motion.div
+              animate={{ y: ["-100%", "500%"] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-[#e8481a]/30 to-transparent z-20 pointer-events-none mix-blend-overlay"
+            />
+            
+            {/* Permanent warm overlay that intensifies on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#e8481a]/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none" />
+            
             <Image
               src="/assets/foto2.jpeg"
               alt="Marvin Raditya Nugraha"
               fill
-              className="object-cover object-top grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+              sizes="(max-width: 1024px) 100vw, 450px"
+              className="object-cover object-top scale-100 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
             />
           </motion.div>
         </motion.div>
@@ -170,7 +190,7 @@ export default function AboutSection() {
           {/* Stats Row */}
           <div className="flex flex-col sm:flex-row gap-12 sm:gap-24 pt-4">
             <CounterNumber value="3" label="YEARS" />
-            <CounterNumber value="20+" label="PROJECTS" />
+            <CounterNumber value="10+" label="PROJECTS" />
             <CounterNumber value="10+" label="CLIENTS" />
           </div>
 

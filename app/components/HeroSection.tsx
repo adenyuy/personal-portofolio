@@ -21,23 +21,7 @@ export default function HeroSection() {
       id="hero"
       className="relative min-h-screen flex flex-col items-center justify-end overflow-hidden bg-[#0a0a0a]"
     >
-      {/* Radial gradient background glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 70%, rgba(232,72,26,0.18) 0%, transparent 70%)",
-        }}
-      />
-
-      {/* Animated grain texture */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: "150px 150px",
-        }}
-      />
+      {/* Background effects are now handled globally in app/layout.tsx */}
 
       <motion.div style={{ y, opacity }} className="relative z-10 flex flex-col items-center text-center px-4 mt-24">
         {/* Subtitle */}

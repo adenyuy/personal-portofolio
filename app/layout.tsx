@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   },
 };
 
+import BackgroundEffects from "./components/BackgroundEffects";
+import { SmoothCursor } from "./components/magicui/smooth-cursor";
+import SmoothScrolling from "./components/SmoothScrolling";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,8 +42,12 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${barlowCondensed.variable}`}
     >
-      <body className="min-h-screen bg-[#0a0a0a] text-white antialiased">
-        {children}
+      <body className="min-h-screen bg-transparent text-white antialiased selection:bg-[#e8481a] selection:text-white scrollbar-thin scrollbar-thumb-[#e8481a] scrollbar-track-transparent">
+        <SmoothScrolling>
+          <BackgroundEffects />
+          <SmoothCursor />
+          {children}
+        </SmoothScrolling>
       </body>
     </html>
   );
