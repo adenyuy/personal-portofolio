@@ -10,7 +10,33 @@ import './Shuffle.css';
 
 gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP);
 
-const Shuffle = ({
+export interface ShuffleProps {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+  shuffleDirection?: 'right' | 'left' | 'up' | 'down';
+  duration?: number;
+  maxDelay?: number;
+  ease?: string;
+  threshold?: number;
+  rootMargin?: string;
+  tag?: string | React.ElementType;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  onShuffleComplete?: () => void;
+  shuffleTimes?: number;
+  animationMode?: 'evenodd' | 'random';
+  loop?: boolean;
+  loopDelay?: number;
+  stagger?: number;
+  scrambleCharset?: string;
+  colorFrom?: string;
+  colorTo?: string;
+  triggerOnce?: boolean;
+  respectReducedMotion?: boolean;
+  triggerOnHover?: boolean;
+}
+
+const Shuffle: React.FC<ShuffleProps> = ({
   text,
   className = '',
   style = {},

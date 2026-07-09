@@ -13,6 +13,7 @@ class Pixel {
   size: number;
   sizeStep: number;
   maxSize: number;
+  maxSizeInteger: number;
   delay: number;
   counter: number;
   counterStep: number;
