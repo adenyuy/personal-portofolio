@@ -2,6 +2,7 @@
 
 import { motion, useInView, AnimatePresence, useScroll, useTransform, MotionValue } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { ScrollVelocityContainer, ScrollVelocityRow } from "./magicui/scroll-based-velocity";
 
 const projects = [
   {
@@ -60,46 +61,7 @@ const projects = [
   }
 ];
 
-function GalleryImage({
-  img,
-  idx,
-  total,
-  scrollYProgress,
-}: {
-  img: string;
-  idx: number;
-  total: number;
-  scrollYProgress: MotionValue<number>;
-}) {
-  const step = 0.8 / total;
-  const start = idx * step;
-  const end = start + step;
-
-  // Alternate directions: Even index slides from Right (400), Odd index slides from Left (-400)
-  const startDirection = idx % 2 === 0 ? 400 : -400;
-  const startRotation = idx % 2 === 0 ? 15 : -15;
-
-  const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-  const xOffset = useTransform(scrollYProgress, [start, end], [startDirection, 0]);
-  const rotate = useTransform(scrollYProgress, [start, end], [startRotation, 0]);
-
-  return (
-    <motion.img
-      src={img}
-      alt={`Gallery ${idx}`}
-      className="absolute top-1/2 left-1/2 w-4/5 rounded-xl shadow-2xl border border-white/5 object-cover"
-      style={{
-        opacity,
-        x: `calc(-50% + ${60 - idx * 30}px)`,
-        y: `calc(-50% + ${idx * 30 - 60}px)`,
-        translateX: xOffset,
-        rotate: rotate,
-        zIndex: idx,
-      }}
-    />
-  );
-}
-
+// Removed GalleryImage in favor of ScrollVelocity
 function ProjectImageBlock({
   project,
   index,
@@ -135,9 +97,9 @@ function ProjectImageBlock({
   return (
     <div
       ref={ref}
-      className={`${(project as any).gallery ? "h-[500vh]" : "h-[70vh] lg:h-screen"} w-full relative`}
+      className="h-[70vh] lg:h-screen w-full relative"
     >
-      <div className={`${(project as any).gallery ? "sticky top-0 h-screen" : "h-full"} w-full flex items-center justify-center p-6 lg:p-12 lg:pl-0`}>
+      <div className="h-full w-full flex items-center justify-center p-6 lg:p-12 lg:pl-0">
         <div style={{ perspective: "1500px" }} className="relative group w-full aspect-[4/3] lg:aspect-video">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, rotateY: (project as any).media ? -30 : 0, z: -100 }}
@@ -149,16 +111,33 @@ function ProjectImageBlock({
             style={{ transformStyle: "preserve-3d" }}
           >
           {(project as any).gallery ? (
-            <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
-              {(project as any).gallery.map((img: string, idx: number) => (
-                <GalleryImage 
-                  key={idx} 
-                  img={img} 
-                  idx={idx} 
-                  total={(project as any).gallery.length} 
-                  scrollYProgress={scrollYProgress} 
-                />
-              ))}
+            <div className="w-full h-full relative overflow-hidden flex flex-col items-center justify-center bg-[#111]">
+              <ScrollVelocityContainer className="w-full">
+                <ScrollVelocityRow baseVelocity={5} direction={1} className="py-2">
+                  {(project as any).gallery.map((img: string, idx: number) => (
+                    <img
+                      key={`top-${idx}`}
+                      src={img}
+                      alt={`Gallery ${idx}`}
+                      loading="lazy"
+                      className="mx-2 lg:mx-4 inline-block h-32 lg:h-56 w-auto rounded-lg object-contain shadow-sm border border-white/5 bg-[#0f0f0f]"
+                    />
+                  ))}
+                </ScrollVelocityRow>
+                <ScrollVelocityRow baseVelocity={5} direction={-1} className="py-2">
+                  {(project as any).gallery.map((img: string, idx: number) => (
+                    <img
+                      key={`bottom-${idx}`}
+                      src={img}
+                      alt={`Gallery ${idx}`}
+                      loading="lazy"
+                      className="mx-2 lg:mx-4 inline-block h-32 lg:h-56 w-auto rounded-lg object-contain shadow-sm border border-white/5 bg-[#0f0f0f]"
+                    />
+                  ))}
+                </ScrollVelocityRow>
+              </ScrollVelocityContainer>
+              <div className="from-[#111] pointer-events-none absolute inset-y-0 left-0 w-1/6 bg-gradient-to-r z-10" />
+              <div className="from-[#111] pointer-events-none absolute inset-y-0 right-0 w-1/6 bg-gradient-to-l z-10" />
             </div>
           ) : (project as any).media ? (
             <video

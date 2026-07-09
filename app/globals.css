@@ -32,6 +32,7 @@
 
   * {
     box-sizing: border-box;
+    cursor: none !important;
   }
 
   /* Custom scrollbar */
@@ -90,4 +91,15 @@
   font-family: var(--font-barlow), sans-serif;
 }
 
+@keyframes line-shadow {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 100% -100%;
+  }
+}
 
+.animate-line-shadow {
+  animation: line-shadow 15s linear infinite;
+}

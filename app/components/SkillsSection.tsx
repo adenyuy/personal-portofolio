@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { FaPython, FaJsSquare, FaPhp, FaReact, FaLaravel, FaGithub, FaWordpress, FaFigma } from "react-icons/fa";
 import { SiDart, SiTailwindcss, SiPostgresql, SiPrisma, SiFirebase, SiTensorflow, SiScikitlearn, SiOpencv, SiFlutter, SiMysql } from "react-icons/si";
 import { TbSql } from "react-icons/tb";
+import { GlyphMatrix } from "./magicui/glyph-matrix";
 
 const skills = [
   { 
@@ -65,16 +67,35 @@ function BentoCard({
   skill: (typeof skills)[0];
   index: number;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       viewport={{ once: true, margin: "-10%" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`group relative flex flex-col justify-between bg-[#111]/40 backdrop-blur-xl rounded-[2rem] border border-white/5 hover:border-[#e8481a]/50 p-6 md:p-8 overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(232,72,26,0.15)] ${skill.span}`}
     >
       {/* Background glow on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#e8481a]/0 to-[#e8481a]/0 group-hover:from-[#e8481a]/5 group-hover:to-transparent transition-all duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#e8481a]/0 to-[#e8481a]/0 group-hover:from-[#e8481a]/5 group-hover:to-transparent transition-all duration-500 pointer-events-none z-10" />
+
+      {/* GlyphMatrix for all cards */}
+      <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none overflow-hidden rounded-[2rem] [mask-image:linear-gradient(to_bottom,white,transparent)]">
+        {isHovered && (
+          <GlyphMatrix
+            glyphs="01·•+*/\<>="
+            cellSize={14}
+            mutationRate={0.04}
+            interval={90}
+            fadeBottom={0.6}
+            color="#e8481a"
+            className="w-full h-full absolute inset-0"
+          />
+        )}
+      </div>
 
       {/* Top Section: Icons */}
       <div className="flex flex-wrap gap-4 md:gap-6 z-10">
@@ -84,8 +105,9 @@ function BentoCard({
             initial={{ opacity: 0, scale: 0 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15, delay: index * 0.1 + idx * 0.1 }}
-            whileHover={{ scale: 1.2, rotate: [0, -10, 10, -10, 0], color: item.color }}
-            className="relative group/icon cursor-pointer text-4xl md:text-5xl text-[#555] transition-colors duration-300"
+            whileHover={{ scale: 1.25, rotate: [0, -10, 10, -10, 0] }}
+            style={{ color: item.color }}
+            className="relative group/icon cursor-pointer text-4xl md:text-5xl transition-all duration-300 drop-shadow-[0_0_8px_currentColor]"
           >
             {item.icon}
             {/* Tooltip */}
@@ -107,7 +129,10 @@ function BentoCard({
       </div>
       
       {/* Decorative large icon in background */}
-      <div className="absolute -bottom-10 -right-10 text-[15rem] opacity-5 group-hover:opacity-[0.07] group-hover:scale-110 transition-all duration-700 pointer-events-none text-white">
+      <div
+        className="absolute -bottom-10 -right-10 text-[15rem] opacity-[0.06] group-hover:opacity-[0.12] group-hover:scale-110 transition-all duration-700 pointer-events-none"
+        style={{ color: skill.icons[0].color }}
+      >
         {skill.icons[0].icon}
       </div>
     </motion.div>

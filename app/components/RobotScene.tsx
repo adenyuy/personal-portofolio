@@ -19,7 +19,7 @@ function RobotModel() {
 
   return (
     <Float speed={2} rotationIntensity={0.3} floatIntensity={0.6}>
-      <primitive object={scene} scale={1.8} position={[0, -1.5, 0]} />
+      <primitive object={scene} scale={0.9} position={[0, -2.0, 0]} />
     </Float>
   );
 }

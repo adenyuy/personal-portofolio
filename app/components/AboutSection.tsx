@@ -1,57 +1,221 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion, useInView, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import HoloProfileCard from "./HoloProfileCard";
+import PixelCard from "./PixelCard";
 
-function TickerTapeCTA() {
+import Shuffle from "./Shuffle";
+
+function LetsTalkCTA() {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFlying, setIsFlying] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const scrollAnimRef = useRef<ReturnType<typeof animate> | null>(null);
+
+  // Raw motion values
+  const planeX = useMotionValue(0);
+  const planeY = useMotionValue(0);
+  const planeRotate = useMotionValue(45);
+  const planeScale = useMotionValue(1);
+  const planeOpacity = useMotionValue(1);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ctaRef.current || isFlying) return;
+    const rect = ctaRef.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isFlying) return;
+
+    const contactEl = document.querySelector("#contact") as HTMLElement | null;
+    if (!contactEl) return;
+
+    const targetScrollY = contactEl.getBoundingClientRect().top + window.scrollY;
+    const startScrollY = window.scrollY;
+    const totalDistance = targetScrollY - startScrollY;
+
+    // Capture the viewport position of the click
+    const clickX = (e as unknown as MouseEvent).clientX;
+    const clickY = (e as unknown as MouseEvent).clientY;
+    const centerX = window.innerWidth / 2;
+
+    setStartPos({ x: clickX, y: clickY });
+    setIsFlying(true);
+
+    const DURATION = 2500; // ms
+    const startTime = performance.now();
+
+    // Stop any existing scroll/RAF
+    if (scrollAnimRef.current) scrollAnimRef.current.stop();
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+
+    const flyLoop = (now: number) => {
+      const elapsed = now - startTime;
+      const rawT = Math.min(elapsed / DURATION, 1);
+
+      // easeInOutCubic
+      const t = rawT < 0.5
+        ? 4 * rawT * rawT * rawT
+        : 1 - Math.pow(-2 * rawT + 2, 3) / 2;
+
+      // Scroll position: move the view alongside the plane
+      const currentScroll = startScrollY + totalDistance * t;
+      window.scrollTo(0, currentScroll);
+
+      // -- Plane position on screen --
+      // Phase 1 (0–15%): Kick UP & sideways from click point (liftoff sling)
+      // Phase 2 (15%–70%): Glide to screen center, following the view
+      // Phase 3 (70%–100%): Dive down off screen
+
+      let screenX: number;
+      let screenY: number;
+      let rotation: number;
+      let scaleFactor: number;
+      let opacity = 1;
+
+      if (rawT < 0.15) {
+        // Liftoff: pull up and slightly left, growing
+        const p = rawT / 0.15;
+        screenX = clickX + (-60) * p;
+        screenY = clickY + (-120) * p;
+        rotation = 45 + (-60) * p; // tilt backwards
+        scaleFactor = 1 + 0.3 * p;
+      } else if (rawT < 0.7) {
+        // Glide: ease into center of screen with natural S-curve wobble
+        const p = (rawT - 0.15) / 0.55;
+        const easeP = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+
+        // Wobble in X using a sine wave
+        const wobble = Math.sin(p * Math.PI * 3) * 25 * (1 - p);
+        screenX = clickX - 60 + (centerX - clickX + 60) * easeP + wobble;
+        screenY = clickY - 120 + (window.innerHeight * 0.42 - (clickY - 120)) * easeP;
+
+        // Angle should point forward-down as it glides
+        rotation = -15 + (90 - (-15)) * easeP;
+        scaleFactor = 1.3 + 0.7 * easeP;
+      } else {
+        // Dive off screen
+        const p = (rawT - 0.7) / 0.3;
+        const easeP = p * p;
+
+        screenX = centerX + Math.sin(p * Math.PI) * 40;
+        screenY = window.innerHeight * 0.42 + (window.innerHeight * 0.7) * easeP;
+        rotation = 90;
+        scaleFactor = 2 + 2 * p;
+        opacity = 1 - easeP;
+      }
+
+      planeX.set(screenX - 24);
+      planeY.set(screenY - 24);
+      planeRotate.set(rotation);
+      planeScale.set(scaleFactor);
+      planeOpacity.set(opacity);
+
+      if (rawT < 1) {
+        animFrameRef.current = requestAnimationFrame(flyLoop);
+      } else {
+        setIsFlying(false);
+        animFrameRef.current = null;
+      }
+    };
+
+    animFrameRef.current = requestAnimationFrame(flyLoop);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (scrollAnimRef.current) scrollAnimRef.current.stop();
+    };
+  }, []);
+
   return (
-    <a href="#contact" className="group relative flex items-center justify-end w-12 hover:w-64 overflow-hidden bg-[#e8481a] transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)] cursor-pointer mt-4 rounded-full shadow-2xl p-1 h-12 origin-left">
+    <>
+      <a
+        ref={ctaRef}
+        href="#contact"
+        onClick={handleClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onMouseMove={handleMouseMove}
+        className="relative inline-block font-barlow font-black text-[#e8481a] uppercase leading-none tracking-tight cursor-none"
+        style={{ fontSize: "clamp(3rem, 6vw, 5rem)" }}
+      >
+        {/* Hover-only local cursor plane */}
+        <AnimatePresence>
+          {isHovered && !isFlying && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ x: mousePos.x, y: mousePos.y, opacity: 1, scale: 1, rotate: 45 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ type: "spring", mass: 0.04, stiffness: 600, damping: 18 }}
+              className="absolute top-0 left-0 pointer-events-none z-50 -ml-6 -mt-6 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]"
+            >
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" />
+              </svg>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Ticker Tape Area */}
-      <div className="absolute left-1 right-11 overflow-hidden h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-        {/* Gradient fades on edges to make scrolling smooth inside the pill */}
-        <div className="absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-[#e8481a] to-transparent z-10" />
-        <div className="absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-[#e8481a] to-transparent z-10" />
+        <div className={`transition-all duration-500 ${isHovered && !isFlying ? "opacity-30 blur-[2px]" : "opacity-100"}`}>
+          <Shuffle
+            text="LET'S TALK"
+            shuffleDirection="right"
+            duration={0.35}
+            animationMode="evenodd"
+            shuffleTimes={1}
+            ease="power3.out"
+            stagger={0.03}
+            threshold={0.1}
+            triggerOnce={false}
+            triggerOnHover={false}
+            respectReducedMotion={true}
+            loop={true}
+            loopDelay={3}
+          />
+        </div>
+      </a>
 
+      {/* Global fixed-position flying plane driven by motion values */}
+      {isFlying && (
         <motion.div
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-          className="flex items-center whitespace-nowrap font-barlow font-black text-black text-[11px] tracking-widest uppercase h-full"
+          className="fixed top-0 left-0 z-[9999] pointer-events-none text-white drop-shadow-[0_0_30px_rgba(232,72,26,0.9)]"
+          style={{ x: planeX, y: planeY, rotate: planeRotate, scale: planeScale, opacity: planeOpacity }}
         >
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
-          {/* DUPLICATE */}
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
-          <span className="mx-2">LET&apos;S TALK</span>
-          <span className="mx-2">•</span>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" />
+          </svg>
         </motion.div>
-      </div>
-
-      {/* Button Affordance (Arrow Icon) */}
-      <div className="flex-shrink-0 w-10 h-10 bg-[#111] rounded-full flex items-center justify-center group-hover:bg-white transition-colors duration-500 z-20 shadow-md">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white group-hover:text-black group-hover:rotate-45 group-hover:scale-110 transition-all duration-500">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
-      </div>
-    </a>
+      )}
+    </>
   );
 }
 
 function CounterNumber({ value, label }: { value: string; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true });
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
+
+  const isInfinity = value.includes("∞");
+  const numericValue = isInfinity ? 0 : parseInt(value.replace(/\D/g, ""), 10) || 0;
+  const suffix = isInfinity ? "" : value.replace(/\d/g, "");
+
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+  const display = useTransform(rounded, (latest) => isInfinity ? "∞" : `${latest}${suffix}`);
+
+  useEffect(() => {
+    if (isInView) {
+      animate(count, numericValue, { duration: 2, ease: "easeOut" });
+    }
+  }, [count, isInView, numericValue]);
 
   return (
     <div ref={ref} className="flex flex-col">
@@ -60,9 +224,14 @@ function CounterNumber({ value, label }: { value: string; label: string }) {
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="font-barlow font-black text-[#e8481a]"
-        style={{ fontSize: "clamp(5rem, 12vw, 11rem)", lineHeight: 1 }}
+        style={{
+          fontSize: isInfinity
+            ? "clamp(8rem, 18vw, 12rem)"   // much bigger for ∞
+            : "clamp(5rem, 12vw, 11rem)",
+          lineHeight: 1
+        }}
       >
-        {value}
+        <motion.span>{display}</motion.span>
       </motion.span>
       <motion.span
         initial={{ opacity: 0 }}
@@ -128,44 +297,25 @@ export default function AboutSection() {
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.7 }}
           className="lg:w-[28rem] lg:h-[36rem] w-full h-80 flex-shrink-0 relative group p-4"
+          style={{ perspective: 1000 }}
         >
           {/* Ambient Glow */}
           <div className="absolute inset-0 bg-[#e8481a] opacity-0 group-hover:opacity-20 blur-3xl transition-opacity duration-700" />
-          
+
           {/* HUD Corner Brackets */}
           <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:-translate-x-1 group-hover:-translate-y-1 transition-all duration-500" />
           <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-500" />
           <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:-translate-x-1 group-hover:translate-y-1 transition-all duration-500" />
           <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#e8481a]/40 group-hover:border-[#e8481a] group-hover:translate-x-1 group-hover:translate-y-1 transition-all duration-500" />
 
-          {/* Floating Image Container */}
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="w-full h-full relative overflow-hidden bg-[#141414] shadow-2xl transition-all duration-700 group-hover:shadow-[0_0_40px_rgba(232,72,26,0.3)] border border-white/5"
-          >
-            {/* Sci-Fi Scanning Line Animation */}
-            <motion.div
-              animate={{ y: ["-100%", "500%"] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-[#e8481a]/30 to-transparent z-20 pointer-events-none mix-blend-overlay"
-            />
-            
-            {/* Permanent warm overlay that intensifies on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#e8481a]/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none" />
-            
-            <Image
-              src="/assets/foto2.jpeg"
-              alt="Marvin Raditya Nugraha"
-              fill
-              sizes="(max-width: 1024px) 100vw, 450px"
-              className="object-cover object-top scale-100 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
-            />
-          </motion.div>
+          {/* Floating Image Container with Holographic 3D Tilt + Pixel Overlay on Hover */}
+          <PixelCard variant="orange" className="w-full h-full">
+            <HoloProfileCard />
+          </PixelCard>
         </motion.div>
 
         {/* Right Content */}
-        <div className="flex-1 flex flex-col gap-2 py-2">
+        <div className="flex-1 flex flex-col gap-0 py-2">
           {/* Top Row: Bio */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-12">
             {/* Bio */}
@@ -187,21 +337,21 @@ export default function AboutSection() {
             </motion.div>
           </div>
 
-          {/* Stats Row */}
-          <div className="flex flex-col sm:flex-row gap-12 sm:gap-24 pt-4">
+          {/* Stats Row — items-end keeps all numbers bottom-aligned */}
+          <div className="flex flex-col sm:flex-row items-end gap-12 sm:gap-24">
             <CounterNumber value="3" label="YEARS" />
             <CounterNumber value="10+" label="PROJECTS" />
-            <CounterNumber value="10+" label="CLIENTS" />
+            <CounterNumber value="∞" label="COFFEE CUPS" />
           </div>
 
-          {/* Expanding Ticker Tape CTA */}
+          {/* Shuffle CTA with Flying Plane */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="pt-6"
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="pt-8 flex justify-start"
           >
-            <TickerTapeCTA />
+            <LetsTalkCTA />
           </motion.div>
         </div>
       </div>

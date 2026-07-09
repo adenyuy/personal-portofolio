@@ -4,6 +4,8 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Dock, DockIcon } from "./magicui/dock";
 import { FiGithub, FiLinkedin, FiInstagram, FiMail } from "react-icons/fi";
+import { SiKaggle } from "react-icons/si";
+import { ScrollVelocityContainer, ScrollVelocityRow } from "./magicui/scroll-based-velocity";
 
 function DownloadResumeButton() {
   const text = "GRAB FULL RESUME";
@@ -96,15 +98,18 @@ export default function FooterSection() {
           initial={{ opacity: 0, y: 60 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full overflow-hidden mb-8 mt-4 relative"
         >
-          <h2
-            className="font-barlow font-black text-[#e8481a] uppercase leading-[0.88] mb-6"
-            style={{ fontSize: "clamp(3rem, 12vw, 11rem)", lineHeight: 0.88 }}
-          >
-            LET&apos;S WORK
-            <br />
-            TOGETHER
-          </h2>
+          <ScrollVelocityContainer className="font-barlow font-black text-[#e8481a] uppercase">
+            <ScrollVelocityRow baseVelocity={3} direction={1}>
+              <span className="px-4" style={{ fontSize: "clamp(4rem, 12vw, 11rem)", lineHeight: 0.88 }}>LET'S WORK TOGETHER ✦</span>
+            </ScrollVelocityRow>
+            <ScrollVelocityRow baseVelocity={3} direction={-1}>
+              <span className="px-4" style={{ fontSize: "clamp(4rem, 12vw, 11rem)", lineHeight: 0.88 }}>LET'S WORK TOGETHER ✦</span>
+            </ScrollVelocityRow>
+          </ScrollVelocityContainer>
+          <div className="from-[#141414] pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r z-10" />
+          <div className="from-[#141414] pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l z-10" />
         </motion.div>
 
         <motion.p
@@ -142,6 +147,11 @@ export default function FooterSection() {
             <DockIcon>
               <a href="https://www.linkedin.com/in/marvinugraha" target="_blank" rel="noreferrer" className="size-full flex items-center justify-center p-[10px] text-[#888] hover:text-[#e8481a] transition-colors duration-300">
                 <FiLinkedin className="w-full h-full" />
+              </a>
+            </DockIcon>
+            <DockIcon>
+              <a href="https://www.kaggle.com/adenyuy" target="_blank" rel="noreferrer" className="size-full flex items-center justify-center p-[12px] text-[#888] hover:text-[#e8481a] transition-colors duration-300">
+                <SiKaggle className="w-full h-full" />
               </a>
             </DockIcon>
             <DockIcon>
