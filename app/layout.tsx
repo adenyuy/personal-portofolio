@@ -16,13 +16,13 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: "Marvin Nugraha — Creative Developer",
+  title: "Marvin Nugraha | Portfolio",
   description:
     "Full-stack developer & UI/UX designer building digital experiences that are intuitive, modern, and easy to connect with.",
   keywords: ["portfolio", "developer", "UI/UX", "frontend", "React", "Next.js"],
   authors: [{ name: "Marvin Nugraha" }],
   openGraph: {
-    title: "Marvin Nugraha — Creative Developer",
+    title: "Marvin Nugraha | Portfolio",
     description: "Building digital experiences that catch your eye.",
     type: "website",
   },
